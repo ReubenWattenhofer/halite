@@ -30,7 +30,7 @@ def get_richest_direction(ship):
     for pos in positions_list:
     # Reject positions that are already being moved into.
     # Also reject positions that hold other ships
-        if pos in next_moves or  (game_map[pos].is_occupied ): # and pos != ship.position
+        if pos in next_moves or  (game_map[pos].is_occupied and pos != ship.position):
             ind = positions_list.index(pos)
             positions_list.remove(pos)
             del halite_list[ind]
