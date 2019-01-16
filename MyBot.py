@@ -14,6 +14,9 @@ next_moves = {}
 # List of which ships have been given a move command
 command_queue = []
 
+# To prevent backtracking during dropoffs
+
+
 def get_richest_direction(player, ship):
     # Can't move? Don't move!
     if ship.halite_amount < game_map[ship.position].halite_amount/10:
@@ -96,8 +99,14 @@ def move_to_dropoff(player, ship):
                 next_moves[ship.id] = ship.position.directional_offset(direction)
                 return direction
                 
+    command_queue.append(ship.stay_still())
+    next_moves[ship.id] = ship.position
     return Direction.Still
-#    return game_map.naive_navigate(ship, me.shipyard.position)
+
+#    direction = game_map.naive_navigate(ship, player.shipyard.position)
+#    command_queue.append(ship.move( direction ))
+#    next_moves[ship.id] = ship.position.directional_offset(direction)
+#    return game_map.naive_navigate(ship, player.shipyard.position)
 
 
 
