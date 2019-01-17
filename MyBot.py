@@ -79,7 +79,7 @@ def move_to_dropoff(player, ship):
     # Derived from naive_navigate()
     for direction in game_map.get_unsafe_moves(ship.position, player.shipyard.position):
         target_pos = ship.position.directional_offset(direction)
-        if not game_map[target_pos].is_occupied and (next_moves.values() is None or not target_pos in next_moves.values()):
+        if (game_map[target_pos].is_occupied and not player.has_ship(game_map[target_pos].ship.id) ) or (not game_map[target_pos].is_occupied and (next_moves.values() is None or not target_pos in next_moves.values())):
     #        self[target_pos].mark_unsafe(ship)
             command_queue.append(ship.move(direction))
             # Add the planned movement to the list
@@ -170,7 +170,7 @@ while True:
 
     # If you're on the first turn and have enough halite, spawn a ship.
     # Don't spawn a ship if you currently have a ship at port, though.
-    if game.turn_number <= 200 and me.halite_amount >= constants.SHIP_COST and len(me.get_ships()) < 15 and not game_map[me.shipyard].is_occupied and not me.shipyard.position in next_moves.values():
+    if game.turn_number <= 200 and me.halite_amount >= constants.SHIP_COST and len(me.get_ships()) < 15 and ((game_map[me.shipyard.position].is_occupied and not me.has_ship(game_map[me.shipyard.position].ship.id) ) or (not game_map[me.shipyard].is_occupied and not me.shipyard.position in next_moves.values())):
         command_queue.append(game.me.shipyard.spawn())
 
     # Send your moves back to the game environment, ending this turn.
