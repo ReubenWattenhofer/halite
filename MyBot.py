@@ -8,9 +8,14 @@ from hlt.positionals import Direction
 import random
 import logging
 
+# Add variables to these game stages as needed
 class Early_Game:
     # TODO: Have this vary depending on map size / number of players
     max_ships = 10
+
+class Late_Game:
+    # We don't want to waste resources building ships when they won't be able to reach the mining areas
+    max_ships = 0
 
 class Endgame:
     max_ships = 0
@@ -168,6 +173,8 @@ game.ready("MyPythonBot")
 
 # When endgame is activated
 endgame_turn = constants.MAX_TURNS  - 20
+# TODO: Base this on percentege of halite on map, and size of map.
+late_game_turn = constants.MAX_TURNS  - 30
 
 
 while True:
@@ -233,7 +240,9 @@ while True:
     if me.halite_amount >= constants.SHIP_COST and len(me.get_ships()) < current_game.max_ships and ((for_real_occupied(me.shipyard.position, me, game_map) and not me.has_ship(game_map[me.shipyard.position].ship.id) ) or (not game_map[me.shipyard].is_occupied and not me.shipyard.position in next_moves.values())):
         command_queue.append(game.me.shipyard.spawn())
 
-
+    if game.turn_number == late_game_turn:
+        current_game = Late_Game()
+        
  	# If at endgame, toggle it and send the ships home
     if game.turn_number == endgame_turn:
         current_game = Endgame()
