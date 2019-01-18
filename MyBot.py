@@ -20,17 +20,23 @@ command_queue = []
 # List of ships to move in order of priority; only includes returning ships
 ship_order = []
 
+# Create a list of incoming ships, ordered by distance to shipyard.  This is to enable ships to maximize space as they approach.
+# Combined with ship swapping (a must), this seems to do the job well; I don't think A* pathfinding or anything else complicated is necessary.
 def order_movements(player, game_map):
     distances = {}
     
+	# Ignore ships that aren't returning to base.
+	# TODO: incorporate dropoffs
     for ship in player.get_ships():
         if ship.id not in ship_status or ship_status[ship.id] != "returning":
             continue
+		# Add the distance from the nearest dropoff to the list
         distances[ship.id] = game_map.calculate_distance(ship.position, player.shipyard.position)
     
+	# Sort using StackOverflow :)
     # https://stackoverflow.com/questions/20944483/python-3-sort-a-dict-by-its-values/20948781
     s = [(k, distances[k]) for k in sorted(distances, key=distances.get, reverse=False)]    
-    for k, v in s:    
+    for k, v in s:
         ship_order.append(k)
 #    logging.info("ship_order \n {}".format(ship_order) )
     return
@@ -38,13 +44,14 @@ def order_movements(player, game_map):
     
 
 
-# Doesn't count a space as occupied if a ship is moving from it
+# Unlike the built-in map variable is_occupied, this doesn't count a space as occupied if a ship is moving from it.  Or unless the ship is an enemy (how can we know its movement in that case?)
 def for_real_occupied(position, player, game_map):
     # Occupied by another player?
     if (game_map[position].is_occupied and not player.has_ship(game_map[position].ship.id) ):
         return True
     # Return occupied if the ship hasn't moved yet or is staying still    
     # TODO: try to optimize movement by forcing the other ship to move first? This can be done by sorting the ships movement order by distance from dropoff points
+	# DONE
     if game_map[position].is_occupied:
         id = game_map[position].ship.id
         if next_moves.keys() is None or id not in next_moves.keys() or next_moves.get(id) == position:
@@ -112,7 +119,10 @@ def move_to_dropoff(player, ship, game_map):
         
     # TODO: incorporate dropoffs, not just shipyard
     # Derived from naive_navigate()
-    for direction in game_map.get_unsafe_moves(ship.position, player.shipyard.position):
+    moves = game_map.get_unsafe_moves(ship.position, player.shipyard.position)
+	# Randomize the available moves so that the area around the shipyard can be evenly filled with incoming ships.  Has a small (almost negligible) effect in terms of overall rating.  Looks good though...
+    random.shuffle(moves)
+    for direction in moves:
         target_pos = ship.position.directional_offset(direction)
         if (for_real_occupied(target_pos, player, game_map) and not player.has_ship(game_map[target_pos].ship.id) ) or (not for_real_occupied(target_pos, player, game_map) and (next_moves.values() is None or not target_pos in next_moves.values())):
     #        self[target_pos].mark_unsafe(ship)
