@@ -205,13 +205,17 @@ while True:
     
 
     for ship in me.get_ships():    
+        # If we've reached the end then there's no point in wandering around waiting for the world to end.
+        if type(current_game) is Endgame:
+            break
+            
 #        logging.info("Ship {} has {} halite.".format(ship.id, ship.halite_amount))
         
 		# Don't do anything with a ship that's already moved (can occur during swapping)
         if not next_moves.keys() is None and ship.id in next_moves.keys():
             continue
 
-        if ship.halite_amount >= constants.MAX_HALITE / 4:
+        if ship.halite_amount >= constants.MAX_HALITE * (4.0/5.0):
             ship_status[ship.id] = "returning"
         
         # For each of your ships, move randomly if the ship is on a low halite location or the ship is full.
@@ -229,7 +233,8 @@ while True:
     if me.halite_amount >= constants.SHIP_COST and len(me.get_ships()) < current_game.max_ships and ((for_real_occupied(me.shipyard.position, me, game_map) and not me.has_ship(game_map[me.shipyard.position].ship.id) ) or (not game_map[me.shipyard].is_occupied and not me.shipyard.position in next_moves.values())):
         command_queue.append(game.me.shipyard.spawn())
 
-	# If at endgame, toggle it and send the ships home
+
+ 	# If at endgame, toggle it and send the ships home
     if game.turn_number == endgame_turn:
         current_game = Endgame()
         for ship in me.get_ships():
