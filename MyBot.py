@@ -236,7 +236,7 @@ def move_to_dropoff(player, ship, game_map):
 game = hlt.Game()
 
 # Respond with your name.
-game.ready("MyPythonBot")
+game.ready("Croissant")
 
 # When endgame is activated
 endgame_turn = constants.MAX_TURNS  - 20
